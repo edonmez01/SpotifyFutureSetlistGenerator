@@ -26,7 +26,7 @@ CUSTOM_MAP = {
 }
 
 REPERTORIO_TOKEN = os.getenv('REPERTORIO_TOKEN')
-api = Repertorio(REPERTORIO_TOKEN)
+repertorio_api = Repertorio(REPERTORIO_TOKEN)
 spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope='playlist-modify-public'))
 
 playlist_tracks_obj = spotify.playlist_items(PLAYLIST_ID, additional_types=('track',))
@@ -48,7 +48,7 @@ for i in range(len(BANDS)):
     success = False
     while not success:
         try:
-            artists = api.artists(artistName=band_name, sort='relevance')
+            artists = repertorio_api.artists(artistName=band_name, sort='relevance')
             success = True
         except requests.exceptions.HTTPError:
             pass
@@ -63,7 +63,7 @@ for i in range(len(BANDS)):
         success = False
         while not success:
             try:
-                setlists = api.setlists(artistMbid=artist_mbid, p=page_num)
+                setlists = repertorio_api.setlists(artistMbid=artist_mbid, p=page_num)
                 success = True
             except requests.exceptions.HTTPError as e:
                 if str(e)[:3] == '404':
