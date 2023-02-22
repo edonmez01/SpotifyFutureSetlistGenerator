@@ -25,7 +25,7 @@ CUSTOM_MAP = {
     # 'rotting christ - chaos geneto (the sign of prime creation)': 'rotting christ - the signe of prime creation'
 }
 
-REPERTORIO_TOKEN = os.getenv('REPORTORIO_TOKEN')
+REPERTORIO_TOKEN = os.getenv('REPERTORIO_TOKEN')
 api = Repertorio(REPERTORIO_TOKEN)
 spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope='playlist-modify-public'))
 
