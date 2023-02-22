@@ -1,21 +1,32 @@
-from repertorio import Repertorio
+from collections import defaultdict as dd
+import os
 import requests
 import time
-from collections import defaultdict as dd
+
+from repertorio import Repertorio
+
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-import os
 
+# Define the environment variables SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, SPOTIPY_REDIRECT_URI, and REPERTORIO_TOKEN.
+# More information about these can be found at:
+# https://spotipy.readthedocs.io/en/2.22.1/#authorization-code-flow
+# https://repertorio.readthedocs.io/en/latest/
+
+# Enter the playlist ID of the playlist you want to generate:
 PLAYLIST_ID = '66Mx7JJfRbwBMLKv8I3K9l'
+
+# Enter the names of the bands you want to search, and the search start dates:
 BANDS = ['fleshgod apocalypse', 'obscura', 'wolfheart', 'thulcandra', 'hinayana']
 SEARCH_START_DATES = ['18-02-2023', '18-02-2023', '18-02-2023', '18-02-2023', '09-09-2021']
 
+# This dictionary can be used to map a song name to a custom string (example usage given below):
 CUSTOM_MAP = {
-
+    # 'rotting christ - chaos geneto (the sign of prime creation)': 'rotting christ - the signe of prime creation'
 }
 
-REPORTORIO_TOKEN = os.getenv('REPORTORIO_TOKEN')
-api = Repertorio(REPORTORIO_TOKEN)
+REPERTORIO_TOKEN = os.getenv('REPORTORIO_TOKEN')
+api = Repertorio(REPERTORIO_TOKEN)
 spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope='playlist-modify-public'))
 
 playlist_tracks_obj = spotify.playlist_items(PLAYLIST_ID, additional_types=('track',))
