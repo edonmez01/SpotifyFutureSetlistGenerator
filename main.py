@@ -1,3 +1,4 @@
+import sys
 from collections import defaultdict as dd
 import os
 import requests
@@ -17,17 +18,32 @@ from spotipy.oauth2 import SpotifyOAuth
 PLAYLIST_ID = '66Mx7JJfRbwBMLKv8I3K9l'
 
 # Enter the names of the bands you want to search, and the search start dates:
-BANDS = ['fleshgod apocalypse', 'obscura', 'wolfheart', 'thulcandra', 'hinayana']
-SEARCH_START_DATES = ['18-02-2023', '18-02-2023', '18-02-2023', '18-02-2023', '09-09-2021']
+BANDS = ['fleshgod apocalypse', 'obscura', 'wolfheart', 'thulcandra', 'hinayana', 'cradle of filth', 'devildriver',
+         'black satellite', 'oni', 'eluveitie', 'omnium gatherum', 'seven spires']
+SEARCH_START_DATES = ['18-02-2023', '18-02-2023', '18-02-2023', '18-02-2023', '09-09-2021', '08-03-2023', '08-03-2023',
+                      '08-03-2023', '08-03-2023', '02-03-2023', '02-03-2023', '02-03-2023']
 
 # This dictionary can be used to map a song name to a custom string (example usage given below):
 CUSTOM_MAP = {
     # 'rotting christ - chaos geneto (the sign of prime creation)': 'rotting christ - the signe of prime creation'
+    'eluveitie - anu': '',
+    'eluveitie - guitar solo': '',
+    'eluveitie - drum solo': '',
+    'eluveitie - de ruef vo de bärge / the call of the mountains': 'eluveitie - the call of the mountains',
+    'eluveitie - l\'appel des montagnes': 'eluveitie - the call of the mountains'
 }
 
 REPERTORIO_TOKEN = os.getenv('REPERTORIO_TOKEN')
 repertorio_api = Repertorio(REPERTORIO_TOKEN)
-spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope='playlist-modify-public'))
+spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope='playlist-modify-public,user-read-currently-playing'))
+
+try:
+    if spotify.currently_playing()['is_playing']:
+        sys.exit()
+except SystemExit:  # TODO: figure out what happens when logged out
+    sys.exit()
+except:
+    pass
 
 playlist_tracks_obj = spotify.playlist_items(PLAYLIST_ID, additional_types=('track',))
 playlist_tracks = []
@@ -117,5 +133,10 @@ for i in range(len(BANDS)):
         spotify_search_query = f'{song} artist:{band}'
         search_result = spotify.search(spotify_search_query, limit=5)
         print(f'{band:>{max_band_name}} - {song:>{max_song_name}}: {v:<20} ({len(d[k]):>2})')
-        song_id = search_result['tracks']['items'][0]['id']
+        try:
+            song_id = search_result['tracks']['items'][0]['id']
+        except IndexError as e:
+            print(str(e))
+            continue
+
         spotify.playlist_add_items(PLAYLIST_ID, (song_id,))
