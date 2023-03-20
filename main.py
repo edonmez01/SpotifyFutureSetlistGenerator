@@ -18,10 +18,8 @@ from spotipy.oauth2 import SpotifyOAuth
 PLAYLIST_ID = '66Mx7JJfRbwBMLKv8I3K9l'
 
 # Enter the names of the bands you want to search, and the search start dates:
-BANDS = ['fleshgod apocalypse', 'obscura', 'wolfheart', 'thulcandra', 'hinayana', 'cradle of filth', 'devildriver',
-         'black satellite', 'oni', 'eluveitie', 'omnium gatherum', 'seven spires']
-SEARCH_START_DATES = ['18-02-2023', '18-02-2023', '18-02-2023', '18-02-2023', '09-09-2021', '08-03-2023', '08-03-2023',
-                      '08-03-2023', '08-03-2023', '02-03-2023', '02-03-2023', '02-03-2023']
+BANDS = ['cradle of filth', 'devildriver', 'black satellite', 'oni', 'eluveitie', 'omnium gatherum', 'seven spires']
+SEARCH_START_DATES = ['08-03-2023', '08-03-2023', '08-03-2023', '08-03-2023', '02-03-2023', '02-03-2023', '02-03-2023']
 
 # This dictionary can be used to map a song name to a custom string (example usage given below):
 CUSTOM_MAP = {
@@ -30,7 +28,8 @@ CUSTOM_MAP = {
     'eluveitie - guitar solo': '',
     'eluveitie - drum solo': '',
     'eluveitie - de ruef vo de bärge / the call of the mountains': 'eluveitie - the call of the mountains',
-    'eluveitie - l\'appel des montagnes': 'eluveitie - the call of the mountains'
+    'eluveitie - l\'appel des montagnes': 'eluveitie - the call of the mountains',
+    'omnium gatherum - unknowing': 'omnium gatherum - the unknowing'
 }
 
 REPERTORIO_TOKEN = os.getenv('REPERTORIO_TOKEN')
@@ -50,6 +49,8 @@ playlist_tracks = []
 for item in playlist_tracks_obj['items']:
     playlist_tracks.append(item['track']['id'])
 spotify.playlist_remove_all_occurrences_of_items(PLAYLIST_ID, playlist_tracks)
+
+time.sleep(1)
 
 for i in range(len(BANDS)):
     max_band_name = 0
