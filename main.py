@@ -136,7 +136,7 @@ for i in range(len(BANDS)):
         print(f'{band:>{max_band_name}} - {song:>{max_song_name}}: {v:<20} ({len(d[k]):>2})')
         try:
             song_id = search_result['tracks']['items'][0]['id']
-        except IndexError as e:
+        except (IndexError, TypeError) as e:
             print(str(e))
             continue
 
