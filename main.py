@@ -132,7 +132,19 @@ for i in range(len(BANDS)):
     for k, v in out_d.items():
         band, song = k.split(' - ', 1)
         spotify_search_query = f'{song} artist:{band}'
-        search_result = spotify.search(spotify_search_query, limit=5)
+        success = False
+        timeout_ctr = 0
+        while not success:
+            try:
+                search_result = spotify.search(spotify_search_query, limit=5)
+                success = True
+            except:
+                timeout_ctr += 1
+                if timeout_ctr >= 10:
+                    success = True  # give up
+                time.sleep(.1)
+                pass
+
         print(f'{band:>{max_band_name}} - {song:>{max_song_name}}: {v:<20} ({len(d[k]):>2})')
         try:
             song_id = search_result['tracks']['items'][0]['id']
