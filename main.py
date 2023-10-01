@@ -44,11 +44,20 @@ except SystemExit:  # TODO: figure out what happens when logged out
 except:
     pass
 
-playlist_tracks_obj = spotify.playlist_items(PLAYLIST_ID, additional_types=('track',))
 playlist_tracks = []
-for item in playlist_tracks_obj['items']:
-    playlist_tracks.append(item['track']['id'])
-spotify.playlist_remove_all_occurrences_of_items(PLAYLIST_ID, playlist_tracks)
+offset = 0
+while True:
+    playlist_tracks_obj = spotify.playlist_items(PLAYLIST_ID, additional_types=('track',), limit=100, offset=offset)
+    if not playlist_tracks_obj['items']:
+        break
+    for item in playlist_tracks_obj['items']:
+        playlist_tracks.append(item['track']['id'])
+    offset += 100
+
+offset = 0
+while offset < len(playlist_tracks):
+    spotify.playlist_remove_all_occurrences_of_items(PLAYLIST_ID, playlist_tracks[offset:offset + 100])
+    offset += 100
 
 time.sleep(1)
 
@@ -140,10 +149,9 @@ for i in range(len(BANDS)):
                 success = True
             except:
                 timeout_ctr += 1
-                if timeout_ctr >= 10:
+                if timeout_ctr >= 50:
                     success = True  # give up
-                time.sleep(.1)
-                pass
+                time.sleep(.5)
 
         print(f'{band:>{max_band_name}} - {song:>{max_song_name}}: {v:<20} ({len(d[k]):>2})')
         try:
@@ -152,4 +160,16 @@ for i in range(len(BANDS)):
             print(str(e))
             continue
 
-        spotify.playlist_add_items(PLAYLIST_ID, (song_id,))
+        success = False
+        timeout_ctr = 0
+        while not success:
+            try:
+                spotify.playlist_add_items(PLAYLIST_ID, (song_id,))
+                success = True
+            except:
+                timeout_ctr += 1
+                if timeout_ctr >= 50:
+                    success = True  # give up
+                time.sleep(.5)
+
+        time.sleep(.5)
