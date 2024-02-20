@@ -173,3 +173,6 @@ for i in range(len(BANDS)):
                 time.sleep(.5)
 
         time.sleep(.5)
+
+    print()
+
