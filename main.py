@@ -137,6 +137,7 @@ for i in range(len(BANDS)):
             out_d[k] = sum(v) / len(v)
 
     out_d = {k: v for k, v in sorted(out_d.items(), key=lambda x: x[1])}
+    playlist_add_buffer = []
 
     for k, v in out_d.items():
         band, song = k.split(' - ', 1)
@@ -160,11 +161,14 @@ for i in range(len(BANDS)):
             print(str(e))
             continue
 
+        playlist_add_buffer.append(song_id)
+
+    if playlist_add_buffer:
         success = False
         timeout_ctr = 0
         while not success:
             try:
-                spotify.playlist_add_items(PLAYLIST_ID, (song_id,))
+                spotify.playlist_add_items(PLAYLIST_ID, playlist_add_buffer)
                 success = True
             except:
                 timeout_ctr += 1
@@ -172,6 +176,7 @@ for i in range(len(BANDS)):
                     success = True  # give up
                 time.sleep(.5)
 
+        playlist_add_buffer.clear()
         time.sleep(.5)
 
     print()
