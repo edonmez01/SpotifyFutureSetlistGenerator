@@ -68,7 +68,12 @@ for i in range(len(BANDS)):
     band_name = BANDS[i]
     max_band_name = max(max_band_name, len(band_name))
     search_start_date = SEARCH_START_DATES[i]
-    limit_day, limit_month, limit_year = (int(n) for n in search_start_date.split('-'))
+    start_limit_day, start_limit_month, start_limit_year = (int(n) for n in search_start_date.split('-'))
+    search_end_date = SEARCH_END_DATES[i]
+    if not search_end_date:
+        end_limit_day, end_limit_month, end_limit_year = 99, 99, 9999
+    else:
+        end_limit_day, end_limit_month, end_limit_year = (int(n) for n in search_end_date.split('-'))
 
     artists = None
     success = False
@@ -101,11 +106,18 @@ for i in range(len(BANDS)):
         for setlist in setlists['setlist']:
             current_date = setlist['eventDate']
             current_day, current_month, current_year = (int(n) for n in current_date.split('-'))
-            if current_year < limit_year\
-                    or (current_year == limit_year and current_month < limit_month)\
-                    or (current_year == limit_year and current_month == limit_month and current_day < limit_day):
+            if current_year < start_limit_year\
+                    or (current_year == start_limit_year and current_month < start_limit_month) \
+                    or (current_year == start_limit_year and current_month == start_limit_month
+                        and current_day < start_limit_day):
                 done = True
                 break
+
+            if current_year > end_limit_year \
+                    or (current_year == end_limit_year and current_month > end_limit_month) \
+                    or (current_year == end_limit_year and current_month == end_limit_month
+                        and current_day > end_limit_day):
+                continue
 
             if not setlist['sets']['set']:
                 continue
