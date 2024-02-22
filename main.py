@@ -36,6 +36,8 @@ REPERTORIO_TOKEN = os.getenv('REPERTORIO_TOKEN')
 repertorio_api = Repertorio(REPERTORIO_TOKEN)
 spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope='playlist-modify-public,user-read-currently-playing'))
 
+print('Spotify connection established')
+
 try:
     if spotify.currently_playing()['is_playing']:
         sys.exit()
@@ -58,6 +60,8 @@ offset = 0
 while offset < len(playlist_tracks):
     spotify.playlist_remove_all_occurrences_of_items(PLAYLIST_ID, playlist_tracks[offset:offset + 100])
     offset += 100
+
+print('Playlist cleared')
 
 time.sleep(1)
 
