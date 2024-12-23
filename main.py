@@ -32,6 +32,12 @@ CUSTOM_MAP = {
     'omnium gatherum - unknowing': 'omnium gatherum - the unknowing'
 }
 
+spotify_id_map = {}
+with open('uris.txt', 'r', encoding='utf-8') as f:
+    for line in f:
+        name, id = line.strip().split(';;')
+        spotify_id_map[name] = id
+
 REPERTORIO_TOKEN = os.getenv('REPERTORIO_TOKEN')
 repertorio_api = Repertorio(REPERTORIO_TOKEN)
 spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(scope='playlist-modify-public,user-read-currently-playing'))
@@ -53,6 +59,8 @@ while True:
     if not playlist_tracks_obj['items']:
         break
     for item in playlist_tracks_obj['items']:
+        if not item['track']:
+            continue
         playlist_tracks.append(item['track']['id'])
     offset += 100
 
@@ -157,27 +165,32 @@ for i in range(len(BANDS)):
 
     for k, v in out_d.items():
         band, song = k.split(' - ', 1)
-        spotify_search_query = f'{song} artist:{band}'
-        success = False
-        timeout_ctr = 0
-        while not success:
+        if f'{band} - {song}' in spotify_id_map:
+            for id in spotify_id_map[f'{band} - {song}'].split(';'):
+                playlist_add_buffer.append(id)
+        else:
+            spotify_search_query = f'{song} artist:\'{band}\''
+            success = False
+            timeout_ctr = 0
+            while not success:
+                try:
+                    search_result = spotify.search(spotify_search_query, limit=5)
+                    success = True
+                except:
+                    timeout_ctr += 1
+                    if timeout_ctr >= 50:
+                        success = True  # give up
+                    time.sleep(.5)
+
+            print(f'{band:>{max_band_name}} - {song:>{max_song_name}}: {v:<20} ({len(d[k]):>2})')
             try:
-                search_result = spotify.search(spotify_search_query, limit=5)
-                success = True
-            except:
-                timeout_ctr += 1
-                if timeout_ctr >= 50:
-                    success = True  # give up
-                time.sleep(.5)
+                song_id = search_result['tracks']['items'][0]['id']
+            except (IndexError, TypeError) as e:
+                print(f'^^ {str(e)}')
+                continue
 
-        print(f'{band:>{max_band_name}} - {song:>{max_song_name}}: {v:<20} ({len(d[k]):>2})')
-        try:
-            song_id = search_result['tracks']['items'][0]['id']
-        except (IndexError, TypeError) as e:
-            print(str(e))
-            continue
-
-        playlist_add_buffer.append(song_id)
+            playlist_add_buffer.append(song_id)
+            spotify_id_map[f'{band} - {song}'] = song_id
 
     if playlist_add_buffer:
         success = False
@@ -195,5 +208,7 @@ for i in range(len(BANDS)):
         playlist_add_buffer.clear()
         time.sleep(.5)
 
-    print()
-
+spotify_id_map = {k: v for k, v in sorted(spotify_id_map.items())}
+with open('uris.txt', 'w', encoding='utf-8') as f:
+    for k, v in spotify_id_map.items():
+        f.write(f'{k};;{v}\n')
